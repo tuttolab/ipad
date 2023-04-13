@@ -52,7 +52,10 @@ searchStarterEl.addEventListener('click', showSearch)
 // searchCloserEl.addEventListener('click', function () {
 //   hideSearch()
 // })
-searchCloserEl.addEventListener('click', hideSearch)
+searchCloserEl.addEventListener('click', function (event) {
+  event.stopPropagation()
+  hideSearch()
+})
 // shadowEl.addEventListener('click', function () {
 //   hideSearch()
 // })
@@ -60,7 +63,7 @@ shadowEl.addEventListener('click', hideSearch)
 
 function showSearch() {
   headerEl.classList.add('searching')
-  document.documentElement.classList.add('fixed')
+  stopScroll()
   headerMenuEls.reverse().forEach(function (el, index) {
     el.style.transitionDelay = index * .4 / headerMenuEls.length + 's' // 여기서는 .4 /12 와 같다.
   })
@@ -73,7 +76,7 @@ function showSearch() {
 }
 function hideSearch() {
   headerEl.classList.remove('searching')
-  document.documentElement.classList.remove('fixed')
+  playScroll()
   headerMenuEls.reverse().forEach(function (el, index) {
     el.style.transitionDelay = index * .4 / headerMenuEls.length + 's' // 여기서는 .4 /12 와 같다.
   })
@@ -83,6 +86,78 @@ function hideSearch() {
   searchDelayEls.reverse()
   searchInputEl.value = ''
 }
+function playScroll() {
+  document.documentElement.classList.remove('fixed')
+}
+function stopScroll() {
+  document.documentElement.classList.add('fixed')
+}
+
+
+
+
+// 헤더 메뉴 토글 [모바일]
+
+const menuStarterEl = document.querySelector('header .menu-starter')
+menuStarterEl.addEventListener('click', function () {
+  if (headerEl.classList.contains('menuing')) {
+    headerEl.classList.remove('menuing')
+    searchInputEl.value = ''
+    playScroll()
+  } else {
+    headerEl.classList.add('menuing')
+    stopScroll()
+  }
+})
+
+
+// 헤더 검색! [모바일]
+
+const searchTextFieldEl = document.querySelector('header .textfield')
+const searchCancelEl = document.querySelector('header .search-canceler')
+searchTextFieldEl.addEventListener('click', function () {
+  headerEl.classList.add('searching--mobile')
+  searchInputEl.focus()
+})
+searchCancelEl.addEventListener('click', function () {
+  headerEl.classList.remove('searching--mobile')
+})
+
+
+// 화면 크기가 달라졌을 때 검색 모드가 종료되도록 처리.
+window.addEventListener('resize', function () {
+  if (window.innerWidth <= 740) {
+    headerEl.classList.remove('searching')
+  } else {
+    headerEl.classList.remove('searching--mobile')
+  }
+})
+
+
+//
+const navEl = document.querySelector('nav')
+const navMenuTogglerEl = navEl.querySelector('.menu-toggler')
+const navMenuShadowEl = navEl.querySelector('.shadow')
+
+navMenuTogglerEl.addEventListener('click', function() {
+  if (navEl.classList.contains('menuing')) {
+    hideNavMenu()
+  } else {
+    showNavMenu()
+  }
+})
+navEl.addEventListener('click', function(event) {
+  event.stopPropagation()
+})
+navMenuShadowEl.addEventListener('click', hideNavMenu)
+window.addEventListener('click', hideNavMenu)
+function showNavMenu() {
+  navEl.classList.add('menuing')
+}
+function hideNavMenu() {
+  navEl.classList.remove('menuing')
+}
+
 
 // 요소의 가시성 관찰
 const io = new IntersectionObserver(function (entries) {
@@ -115,7 +190,7 @@ pauseBtn.addEventListener('click', function () {
   pauseBtn.classList.add('hide')
 })
 
-// 당신에게 맞는 iPad는? 랜더링! *가져오는 코드는 최상단에 작석해야함
+// 당신에게 맞는 iPad는? 랜더링! *가져오는 코드는 최상단에 작성해야함
 const itemsEl = document.querySelector('section.compare .items')  // console.log(ipads)
 
 ipads.forEach(function (ipad) {
@@ -166,6 +241,7 @@ navigations.forEach(function(nav) { /*강의에서는 (nav)인데 git에는 func
   mapEl.innerHTML = /* html */ `
     <h3>
       <span class="text">${nav.title}</span>
+      <span class="icon">+</span>
     </h3>
     <ul>
       ${mapList}
@@ -177,3 +253,14 @@ navigations.forEach(function(nav) { /*강의에서는 (nav)인데 git에는 func
 
 const thisYearEl = document.querySelector('span.this-year')
 thisYearEl.textContent = new Date().getFullYear()
+
+
+// 결국 매개변수 (el) = map, .toggle 메소드는 .add와 .remove 역할을 동시에 수행한다
+// 아코디언 메뉴
+const mapEls = document.querySelectorAll('footer .navigations .map')
+mapEls.forEach(function (el) {
+  const h3El = el.querySelector('h3')
+  h3El.addEventListener('click', function () {
+    el.classList.toggle('active')
+  })
+})
